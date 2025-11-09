@@ -22,9 +22,12 @@ async function main() {
   console.log(`   Output Directory: ${config.output.directory}\n`);
 
   try {
-    // Run the workflow
-    const result = await arxivWorkflow.execute({
-      triggerData: {
+    // Create a workflow run
+    const run = await arxivWorkflow.createRunAsync();
+
+    // Execute the workflow with input data
+    const result = await run.start({
+      inputData: {
         topic: config.arxiv.topic,
         maxResults: config.arxiv.maxResults,
       },
@@ -35,11 +38,13 @@ async function main() {
     console.log('                        RESULTS                            ');
     console.log('═══════════════════════════════════════════════════════════\n');
 
-    console.log(`✅ Successfully processed ${result.processedCount} papers\n`);
+    const workflowOutput = (result as any).result;
 
-    if (result.savedFiles.length > 0) {
+    console.log(`✅ Successfully processed ${workflowOutput.processedCount} papers\n`);
+
+    if (workflowOutput.savedFiles && workflowOutput.savedFiles.length > 0) {
       console.log('📁 Saved files:');
-      result.savedFiles.forEach((file, idx) => {
+      workflowOutput.savedFiles.forEach((file: string, idx: number) => {
         console.log(`   ${idx + 1}. ${file}`);
       });
     }

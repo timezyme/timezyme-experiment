@@ -23,14 +23,14 @@ const searchArxivStep = createStep({
       })
     ),
   }),
-  execute: async ({ context }) => {
+  execute: async ({ inputData }) => {
     console.log('\n🔍 Step 1: Searching arXiv...');
-    console.log(`   Topic: "${context.inputData.topic}"`);
-    console.log(`   Max Results: ${context.inputData.maxResults}`);
+    console.log(`   Topic: "${inputData.topic}"`);
+    console.log(`   Max Results: ${inputData.maxResults}`);
 
     // Use Agent #1 to search arXiv
     const result = await arxivAgent.generate(
-      `Search arXiv for papers about "${context.inputData.topic}". Return up to ${context.inputData.maxResults} most recent papers.`,
+      `Search arXiv for papers about "${inputData.topic}". Return up to ${inputData.maxResults} most recent papers.`,
       {
         onStepFinish: (step) => {
           console.log(`   Agent step: ${step.stepType}`);
@@ -42,9 +42,13 @@ const searchArxivStep = createStep({
     let papers: any[] = [];
 
     if (result.toolResults && result.toolResults.length > 0) {
-      const toolResult = result.toolResults[0];
-      if (toolResult.result && typeof toolResult.result === 'object' && 'papers' in toolResult.result) {
-        papers = toolResult.result.papers as any[];
+      for (const toolResult of result.toolResults) {
+        // Tool was called, check the result
+        const resultData = toolResult as any;
+        if (resultData.result && typeof resultData.result === 'object' && 'papers' in resultData.result) {
+          papers = resultData.result.papers as any[];
+          break;
+        }
       }
     }
 
@@ -74,10 +78,10 @@ const processPapersStep = createStep({
     processedCount: z.number(),
     savedFiles: z.array(z.string()),
   }),
-  execute: async ({ context }) => {
+  execute: async ({ inputData }) => {
     console.log('📄 Step 2: Processing papers with Gemini...');
 
-    const papers = context.inputData.papers;
+    const papers = inputData.papers;
     const savedFiles: string[] = [];
 
     for (let i = 0; i < papers.length; i++) {
@@ -101,21 +105,21 @@ const processPapersStep = createStep({
            Make sure to extract and structure all key information from the paper.`,
           {
             onStepFinish: (step) => {
-              if (step.stepType === 'tool-call') {
-                console.log(`      Tool called: ${step.toolName}`);
-              }
+              console.log(`      Agent step: ${step.stepType}`);
             },
           }
         );
 
         // Check if the file was saved successfully
         if (result.toolResults) {
-          const saveResult = result.toolResults.find(
-            (tr) => tr.toolName === 'save-markdown'
-          );
-          if (saveResult?.result && typeof saveResult.result === 'object' && 'filePath' in saveResult.result) {
-            savedFiles.push(saveResult.result.filePath as string);
-            console.log(`   ✅ Saved: ${saveResult.result.filePath}`);
+          for (const tr of result.toolResults) {
+            const toolData = tr as any;
+            if (toolData.toolName === 'save-markdown' && toolData.result) {
+              if (typeof toolData.result === 'object' && 'filePath' in toolData.result) {
+                savedFiles.push(toolData.result.filePath as string);
+                console.log(`   ✅ Saved: ${toolData.result.filePath}`);
+              }
+            }
           }
         }
       } catch (error) {

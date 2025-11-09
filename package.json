@@ -18,7 +18,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@ai-sdk/google-vertex": "^1.0.9",
+    "@ai-sdk/google-vertex": "^3.0.60",
     "@mastra/core": "latest",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",

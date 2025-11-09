@@ -1,7 +1,19 @@
 import { Agent } from '@mastra/core/agent';
-import { vertex } from '@ai-sdk/google-vertex';
+import { createVertex } from '@ai-sdk/google-vertex';
 import { searchArxivTool } from '../tools/arxiv-tools.js';
 import { config } from '../config.js';
+
+// Create Vertex AI provider with configuration
+const vertex = createVertex({
+  project: config.vertex.projectId,
+  location: config.vertex.location,
+  googleAuthOptions: {
+    credentials: {
+      client_email: process.env.GOOGLE_CLIENT_EMAIL!,
+      private_key: process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+    },
+  },
+});
 
 /**
  * Agent #1: arXiv Search Agent
@@ -20,10 +32,7 @@ When searching:
 - Use the search-arxiv tool to find papers
 - Return the complete list of papers with their IDs, titles, summaries, and PDF URLs
 - Be thorough and accurate in your search results`,
-  model: vertex('gemini-2.0-flash-exp', {
-    project: config.vertex.projectId,
-    location: config.vertex.location,
-  }),
+  model: vertex('gemini-2.0-flash-exp'),
   tools: {
     searchArxivTool,
   },
