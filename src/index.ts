@@ -6,8 +6,8 @@ import { config } from './config.js';
  * Main entry point for the arXiv PDF Processing application
  *
  * This application uses Mastra.ai to:
- * 1. Search arXiv.org for papers by topic (Agent #1)
- * 2. Download and process PDFs with Google Vertex AI Gemini (Agent #2)
+ * 1. Search arXiv.org for papers by topic (Agent #1 - Gemini 2.0 Flash)
+ * 2. Download and process PDFs with Claude Sonnet 4.5 (Agent #2)
  * 3. Save structured markdown summaries to disk
  */
 async function main() {
@@ -18,7 +18,8 @@ async function main() {
   console.log('📋 Configuration:');
   console.log(`   Topic: "${config.arxiv.topic}"`);
   console.log(`   Max Results: ${config.arxiv.maxResults}`);
-  console.log(`   Model: ${config.vertex.model}`);
+  console.log(`   Search Model: ${config.vertex.model} (Gemini)`);
+  console.log(`   Processing Model: ${config.anthropic.model} (Claude)`);
   console.log(`   Output Directory: ${config.output.directory}\n`);
 
   try {
@@ -53,9 +54,10 @@ async function main() {
   } catch (error) {
     console.error('\n❌ Error running workflow:', error);
     console.error('\nPlease check:');
-    console.error('  1. Your .env file has correct Google Vertex AI credentials');
-    console.error('  2. The GOOGLE_PROJECT_ID and GOOGLE_LOCATION are set');
-    console.error('  3. Your service account has Vertex AI permissions\n');
+    console.error('  1. Your .env file has correct credentials');
+    console.error('  2. Google Vertex AI: GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_PROJECT_ID');
+    console.error('  3. Anthropic API: ANTHROPIC_API_KEY is set');
+    console.error('  4. Your Google service account has Vertex AI permissions\n');
     process.exit(1);
   }
 }

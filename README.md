@@ -1,6 +1,6 @@
 # arXiv PDF Processor with Mastra.ai
 
-A TypeScript application built with [Mastra.ai](https://mastra.ai) that automatically fetches arXiv papers by topic, downloads PDFs, and processes them using Google Vertex AI (Gemini 2.5 Pro) to generate structured markdown summaries.
+A TypeScript application built with [Mastra.ai](https://mastra.ai) that automatically fetches arXiv papers by topic, downloads PDFs, and processes them using **Claude Sonnet 4.5** to generate structured markdown summaries.
 
 ## 🏗️ Architecture
 
@@ -16,7 +16,7 @@ This application follows a **clean, architecturally sound design** with clear se
 ┌────────────────────┐            ┌─────────────────────────┐
 │    Agent #1        │            │      Agent #2           │
 │  arXiv Search      │────────▶   │   PDF Processor         │
-│                    │  Papers    │  (Gemini 2.5 Pro)       │
+│  (Gemini 2.0)      │  Papers    │  (Claude Sonnet 4.5)    │
 └────────┬───────────┘            └──────────┬──────────────┘
          │                                    │
          ▼                                    ▼
@@ -39,7 +39,7 @@ This application follows a **clean, architecturally sound design** with clear se
 
 **Agent #2** (`src/agents/pdf-processor-agent.ts`): PDF Processing Agent
 - Downloads PDFs from URLs
-- Processes content with Gemini 2.5 Pro
+- Processes content with **Claude Sonnet 4.5**
 - Generates structured markdown summaries
 - Saves to disk with arXiv ID as filename
 
@@ -53,7 +53,8 @@ This application follows a **clean, architecturally sound design** with clear se
 ### Prerequisites
 
 - Node.js 18+
-- Google Cloud Platform account with Vertex AI API enabled
+- **Anthropic API key** (for Claude Sonnet 4.5)
+- Google Cloud Platform account with Vertex AI API enabled (for arXiv search)
 - Service account credentials with Vertex AI permissions
 
 ### Installation
@@ -70,19 +71,28 @@ cp .env.example .env
 
 Edit `.env` with your credentials:
 ```env
-# Google Vertex AI Configuration
+# Google Vertex AI Configuration (for Agent #1: arXiv Search)
 GOOGLE_CLIENT_EMAIL=your-service-account@your-project.iam.gserviceaccount.com
 GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 GOOGLE_PROJECT_ID=your-gcp-project-id
 GOOGLE_LOCATION=us-central1
+
+# Anthropic API Configuration (for Agent #2: PDF Processing with Claude Sonnet 4.5)
+ANTHROPIC_API_KEY=sk-ant-api03-...
 
 # arXiv Configuration (easily changeable!)
 ARXIV_TOPIC="LLM Graph Knowledge"
 ARXIV_MAX_RESULTS=5
 ```
 
-### Google Vertex AI Setup
+### API Setup
 
+#### Anthropic API (Claude Sonnet 4.5)
+1. Sign up at [Anthropic Console](https://console.anthropic.com/)
+2. Generate an API key
+3. Add to `.env` as `ANTHROPIC_API_KEY`
+
+#### Google Vertex AI (for arXiv Search)
 1. Enable Vertex AI API in your GCP project
 2. Create a service account with `Vertex AI User` role
 3. Generate and download a JSON key file
@@ -147,7 +157,8 @@ Each file contains:
 📋 Configuration:
    Topic: "LLM Graph Knowledge"
    Max Results: 5
-   Model: gemini-2.5-pro
+   Search Model: gemini-2.0-flash-exp (Gemini)
+   Processing Model: claude-sonnet-4-20250514 (Claude)
    Output Directory: ./arxiv
 
 🔍 Step 1: Searching arXiv...
@@ -155,7 +166,7 @@ Each file contains:
    Max Results: 5
    ✅ Found 5 papers
 
-📄 Step 2: Processing papers with Gemini...
+📄 Step 2: Processing papers with Claude...
 
    Processing paper 1/5:
    Title: Graph-based Knowledge Representation in LLMs
@@ -214,6 +225,7 @@ All configuration is centralized in `src/config.ts` and driven by environment va
 |----------|-------------|---------|
 | `ARXIV_TOPIC` | Topic to search for | `"LLM Graph Knowledge"` |
 | `ARXIV_MAX_RESULTS` | Max papers to fetch | `5` |
+| `ANTHROPIC_API_KEY` | Anthropic API key for Claude | Required |
 | `GOOGLE_PROJECT_ID` | GCP Project ID | Required |
 | `GOOGLE_LOCATION` | Vertex AI region | `us-central1` |
 | `GOOGLE_CLIENT_EMAIL` | Service account email | Required |
@@ -241,7 +253,8 @@ TypeScript provides full type safety across:
 
 - **[Mastra.ai](https://mastra.ai)**: AI agent framework
 - **[Vercel AI SDK](https://ai-sdk.dev)**: LLM provider integrations
-- **[Google Vertex AI](https://cloud.google.com/vertex-ai)**: Gemini models
+- **[Anthropic Claude](https://www.anthropic.com/)**: Claude Sonnet 4.5 for PDF processing
+- **[Google Vertex AI](https://cloud.google.com/vertex-ai)**: Gemini 2.0 Flash for search
 - **[Zod](https://zod.dev)**: Schema validation
 - **[arXiv API](https://info.arxiv.org/help/api)**: Academic paper search
 - **TypeScript**: Type-safe development
@@ -322,6 +335,10 @@ const myStep = createStep({
 - Check your internet connection
 - Verify arXiv API is accessible
 
+**Error: "Authentication failed" (Anthropic)**
+- Verify `ANTHROPIC_API_KEY` is correct
+- Check your API key is valid and active at [Anthropic Console](https://console.anthropic.com/)
+
 **Error: "Authentication failed" (Vertex AI)**
 - Verify `GOOGLE_CLIENT_EMAIL` and `GOOGLE_PRIVATE_KEY` are correct
 - Ensure service account has Vertex AI User role
@@ -330,7 +347,7 @@ const myStep = createStep({
 **Error: "Model not found"**
 - Ensure Vertex AI API is enabled in your GCP project
 - Verify the model is available in your region (`GOOGLE_LOCATION`)
-- Check model name is correct (`gemini-2.5-pro`)
+- Check model name is correct (`gemini-2.0-flash-exp`)
 
 ## 📄 License
 
@@ -339,5 +356,6 @@ MIT
 ## 🙏 Acknowledgments
 
 - [Mastra.ai](https://mastra.ai) for the excellent AI framework
+- [Anthropic](https://www.anthropic.com/) for Claude Sonnet 4.5
 - [arXiv.org](https://arxiv.org) for providing open access to research papers
 - Google Cloud for Vertex AI and Gemini models
