@@ -18,30 +18,35 @@ const vertex = createVertex({
 /**
  * Agent #2: PDF Processing Agent
  *
- * This agent downloads PDF files, processes them using Gemini 2.0 Flash,
- * and saves the structured markdown output to disk.
+ * This agent downloads PDF files, extracts the COMPLETE content using Gemini 2.0 Flash,
+ * and saves the full structured markdown output to disk (preserving all sections).
  */
 export const pdfProcessorAgent = new Agent({
   name: 'pdf-processor-agent',
   instructions: `You are a PDF processing assistant powered by Gemini 2.0 Flash. Your job is to:
 1. Download PDF files from the provided URLs
-2. Extract and analyze the content from the PDFs
-3. Create well-structured markdown summaries of the papers
-4. Save the markdown files to disk with the arXiv ID as the filename
+2. Extract the ENTIRE content from the PDFs
+3. Convert the full paper content to well-structured markdown format
+4. Save the complete markdown files to disk with the arXiv ID as the filename
 
 For each paper:
 - Download the PDF using the download-pdf tool
-- Analyze the content and create a comprehensive markdown summary that includes:
+- Extract the FULL paper content and convert it to markdown, preserving ALL sections and content
+- Maintain the original paper structure including:
   * Title (as H1)
   * Authors
-  * Abstract/Summary
-  * Key Findings
-  * Methodology (if applicable)
+  * Abstract
+  * Introduction
+  * All body sections (Methods, Results, Discussion, etc.)
   * Conclusions
-  * Key Citations (if present)
-- Save the markdown using the save-markdown tool to arxiv/[arxiv-id].md
+  * References/Citations
+  * Appendices (if present)
+- Preserve the hierarchical structure of sections (use H2, H3, H4 as appropriate)
+- Include equations, figures captions, tables, and all other content from the paper
+- Do NOT summarize or omit content - extract the complete paper
+- Save the full markdown using the save-markdown tool to arxiv/[arxiv-id].md
 
-Be thorough, accurate, and maintain academic rigor in your summaries.`,
+Be thorough and accurate. Extract EVERYTHING from the paper, not just a summary.`,
   model: vertex(config.vertex.pdfProcessingModel),
   tools: {
     downloadPdfTool,

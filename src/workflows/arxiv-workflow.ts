@@ -104,16 +104,16 @@ const processPapersStep = createStep({
       try {
         // Use Agent #2 to download, process, and save the paper
         const result = await pdfProcessorAgent.generate(
-          `Download and process the PDF from "${paper.pdfUrl}" (arXiv ID: ${paper.id}).
+          `Download and extract the FULL content from the PDF at "${paper.pdfUrl}" (arXiv ID: ${paper.id}).
 
            The paper is titled: "${paper.title}"
 
            Steps:
            1. Download the PDF using the download-pdf tool
-           2. Create a comprehensive markdown summary of the paper
-           3. Save the markdown file using the save-markdown tool with filename: arxiv/${paper.id}.md
+           2. Extract the ENTIRE paper content and convert to markdown, preserving ALL sections and formatting
+           3. Save the complete markdown file using the save-markdown tool with filename: arxiv/${paper.id}.md
 
-           Make sure to extract and structure all key information from the paper.`,
+           IMPORTANT: Extract the COMPLETE paper content, not a summary. Include all sections, references, appendices, etc.`,
           {
             onStepFinish: (step) => {
               console.log(`      Agent step: ${step.stepType}`);
@@ -152,7 +152,7 @@ const processPapersStep = createStep({
  *
  * This workflow orchestrates the two agents:
  * 1. Agent #1 searches arXiv for papers by topic (Gemini 2.0 Flash)
- * 2. Agent #2 downloads PDFs and processes them with Gemini 2.0 Flash
+ * 2. Agent #2 downloads PDFs and extracts full content with Gemini 2.0 Flash
  */
 export const arxivWorkflow = createWorkflow({
   id: 'arxiv-pdf-processing-workflow',
