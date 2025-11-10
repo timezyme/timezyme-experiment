@@ -1,14 +1,16 @@
 #!/usr/bin/env node
-import { pdfProcessorAgent } from './agents/pdf-processor-agent.js';
+import { createVertex } from '@ai-sdk/google-vertex';
+import { generateText } from 'ai';
+import axios from 'axios';
+import pdfParse from 'pdf-parse';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import { config } from './config.js';
 
 /**
  * Main entry point for the arXiv PDF Processing application
  *
- * This application uses Mastra.ai to:
- * 1. Download a PDF from a specified arXiv URL
- * 2. Process the PDF with Gemini 2.5 Flash
- * 3. Save the full paper content as structured markdown
+ * Direct implementation without complex agent/tool overhead
  */
 
 /**
@@ -25,7 +27,7 @@ function extractArxivId(url: string): string {
 
 async function main() {
   console.log('╔═══════════════════════════════════════════════════════════╗');
-  console.log('║      arXiv PDF Processor with Mastra.ai                  ║');
+  console.log('║      arXiv PDF Processor with Gemini                     ║');
   console.log('╚═══════════════════════════════════════════════════════════╝\n');
 
   // Validate configuration
@@ -54,51 +56,85 @@ async function main() {
   console.log(`   Output Directory: ${config.output.directory}\n`);
 
   try {
-    console.log('📄 Processing paper with Gemini...\n');
+    // Step 1: Download and parse PDF
+    console.log('📄 Step 1: Downloading PDF...\n');
+    console.log(`📥 Downloading PDF: ${paperUrl}`);
 
-    // Use the PDF processor agent to download, process, and save the paper
-    const result = await pdfProcessorAgent.generate(
-      `Process this arXiv paper: ${paperUrl} (ID: ${arxivId}). Call download-pdf first, then create markdown and call save-markdown.`,
-      {
-        maxSteps: 5, // Limit agent steps to prevent excessive generation
-        onStepFinish: (step) => {
-          console.log(`   Agent step: ${step.stepType}`);
-        },
-      }
-    );
+    const response = await axios.get(paperUrl, {
+      responseType: 'arraybuffer',
+      timeout: 30000,
+    });
 
-    // Check if the file was saved successfully
-    let savedFile: string | null = null;
+    const pdfBuffer = Buffer.from(response.data);
 
-    console.log(`\n   Debug: toolResults count: ${result.toolResults?.length || 0}`);
+    console.log(`📄 Parsing PDF content...`);
+    const pdfData = await pdfParse(pdfBuffer);
+    let textContent = pdfData.text;
 
-    if (result.toolResults) {
-      for (const tr of result.toolResults) {
-        const toolData = tr as any;
-        console.log(`   Debug: Tool called - ${toolData.toolName}`);
-
-        if (toolData.toolName === 'save-markdown' && toolData.result) {
-          if (typeof toolData.result === 'object' && 'filePath' in toolData.result) {
-            savedFile = toolData.result.filePath as string;
-          }
-        }
-      }
-    } else {
-      console.log('   Debug: No tool results found in response');
-      console.log(`   Debug: Result text: ${result.text?.substring(0, 200) || 'N/A'}`);
+    // Limit content to avoid API timeouts
+    const MAX_CONTENT_LENGTH = 50000;
+    if (textContent.length > MAX_CONTENT_LENGTH) {
+      console.log(`⚠️  PDF too large (${textContent.length} chars), truncating to ${MAX_CONTENT_LENGTH} chars`);
+      textContent = textContent.substring(0, MAX_CONTENT_LENGTH) + '\n\n[... Content truncated due to length ...]';
     }
 
-    console.log('\n\n═══════════════════════════════════════════════════════════');
+    console.log(`✅ Successfully downloaded and parsed PDF (${pdfData.numpages} pages, ${textContent.length} chars)\n`);
+
+    // Step 2: Convert to markdown with Gemini
+    console.log('📝 Step 2: Converting to markdown with Gemini...\n');
+
+    const vertex = createVertex({
+      project: config.vertex.projectId,
+      location: config.vertex.location,
+      googleAuthOptions: {
+        credentials: {
+          client_email: process.env.GOOGLE_CLIENT_EMAIL!,
+          private_key: process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        },
+      },
+    });
+
+    const { text: markdown } = await generateText({
+      model: vertex(config.vertex.model) as any,
+      prompt: `Convert this academic paper to well-structured markdown format. Preserve ALL content and sections.
+
+Paper content:
+${textContent}
+
+Create markdown with:
+- Title as H1
+- Authors
+- Abstract
+- All sections (Introduction, Methods, Results, Discussion, Conclusions)
+- References
+- Preserve hierarchical structure with H2, H3, H4
+- Include all equations, figures, tables
+
+Do NOT summarize - extract EVERYTHING.`,
+    });
+
+    console.log(`✅ Markdown generated (${markdown.length} chars)\n`);
+
+    // Step 3: Save markdown
+    console.log('💾 Step 3: Saving markdown file...\n');
+
+    await fs.mkdir(config.output.directory, { recursive: true });
+
+    const cleanId = arxivId.replace(/[\/\\]/g, '-');
+    const fileName = `${cleanId}.md`;
+    const filePath = path.join(config.output.directory, fileName);
+
+    console.log(`💾 Saving markdown to: ${filePath}`);
+    await fs.writeFile(filePath, markdown, 'utf-8');
+    console.log(`✅ Successfully saved markdown file\n`);
+
+    // Display results
+    console.log('═══════════════════════════════════════════════════════════');
     console.log('                        RESULTS                            ');
     console.log('═══════════════════════════════════════════════════════════\n');
 
-    if (savedFile) {
-      console.log(`✅ Successfully processed paper: ${arxivId}`);
-      console.log(`📁 Saved to: ${savedFile}\n`);
-    } else {
-      console.log('⚠️  Paper was processed but file save status is unclear\n');
-    }
-
+    console.log(`✅ Successfully processed paper: ${arxivId}`);
+    console.log(`📁 Saved to: ${filePath}\n`);
     console.log('✨ Done!\n');
   } catch (error) {
     console.error('\n❌ Error processing paper:', error);
