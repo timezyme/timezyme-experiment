@@ -56,8 +56,14 @@ const searchArxivStep = createStep({
           console.log(`   Debug: payload content: ${JSON.stringify(resultData.payload).substring(0, 200)}...`);
         }
 
-        // Extract from payload (Mastra structure)
-        if (resultData.payload && typeof resultData.payload === 'object' && 'papers' in resultData.payload) {
+        // Extract from payload.result (Mastra structure)
+        if (resultData.payload?.result && typeof resultData.payload.result === 'object' && 'papers' in resultData.payload.result) {
+          papers = resultData.payload.result.papers as any[];
+          console.log(`   Debug: Extracted ${papers.length} papers from payload.result.papers`);
+          break;
+        }
+        // Try payload directly
+        else if (resultData.payload && typeof resultData.payload === 'object' && 'papers' in resultData.payload) {
           papers = resultData.payload.papers as any[];
           console.log(`   Debug: Extracted ${papers.length} papers from payload.papers`);
           break;
