@@ -41,14 +41,31 @@ const searchArxivStep = createStep({
     // Extract papers from the tool results
     let papers: any[] = [];
 
+    // Debug: log the tool results structure
+    console.log(`   Debug: toolResults count: ${result.toolResults?.length || 0}`);
+
     if (result.toolResults && result.toolResults.length > 0) {
       for (const toolResult of result.toolResults) {
-        // Tool was called, check the result
         const resultData = toolResult as any;
+        console.log(`   Debug: toolResult keys: ${Object.keys(resultData).join(', ')}`);
+
+        // Try different extraction patterns
         if (resultData.result && typeof resultData.result === 'object' && 'papers' in resultData.result) {
           papers = resultData.result.papers as any[];
+          console.log(`   Debug: Extracted ${papers.length} papers from result.papers`);
           break;
+        } else if (resultData.content && Array.isArray(resultData.content)) {
+          // Try AI SDK result structure
+          for (const content of resultData.content) {
+            if (content.type === 'tool-result' && content.result && 'papers' in content.result) {
+              papers = content.result.papers as any[];
+              console.log(`   Debug: Extracted ${papers.length} papers from content.result.papers`);
+              break;
+            }
+          }
         }
+
+        if (papers.length > 0) break;
       }
     }
 
@@ -79,7 +96,7 @@ const processPapersStep = createStep({
     savedFiles: z.array(z.string()),
   }),
   execute: async ({ inputData }) => {
-    console.log('📄 Step 2: Processing papers with Gemini...');
+    console.log('📄 Step 2: Processing papers with Claude...');
 
     const papers = inputData.papers;
     const savedFiles: string[] = [];
@@ -140,8 +157,8 @@ const processPapersStep = createStep({
  * Main Workflow: arXiv Paper Processing
  *
  * This workflow orchestrates the two agents:
- * 1. Agent #1 searches arXiv for papers by topic
- * 2. Agent #2 downloads PDFs and processes them with Gemini
+ * 1. Agent #1 searches arXiv for papers by topic (Gemini 2.0 Flash)
+ * 2. Agent #2 downloads PDFs and processes them with Claude Sonnet 4.5
  */
 export const arxivWorkflow = createWorkflow({
   id: 'arxiv-pdf-processing-workflow',
