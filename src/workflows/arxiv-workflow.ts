@@ -49,6 +49,13 @@ const searchArxivStep = createStep({
         const resultData = toolResult as any;
         console.log(`   Debug: toolResult keys: ${Object.keys(resultData).join(', ')}`);
 
+        // Debug: log payload structure
+        if (resultData.payload) {
+          console.log(`   Debug: payload type: ${typeof resultData.payload}`);
+          console.log(`   Debug: payload keys: ${Object.keys(resultData.payload).join(', ')}`);
+          console.log(`   Debug: payload content: ${JSON.stringify(resultData.payload).substring(0, 200)}...`);
+        }
+
         // Extract from payload (Mastra structure)
         if (resultData.payload && typeof resultData.payload === 'object' && 'papers' in resultData.payload) {
           papers = resultData.payload.papers as any[];
