@@ -48,7 +48,8 @@ export const searchArxivTool = createTool({
     try {
       // Build arXiv API query
       const searchQuery = encodeURIComponent(`all:${topic}`);
-      const url = `${config.arxiv.apiUrl}?search_query=${searchQuery}&start=0&max_results=${maxResults}&sortBy=submittedDate&sortOrder=descending`;
+      const apiUrl = 'http://export.arxiv.org/api/query';
+      const url = `${apiUrl}?search_query=${searchQuery}&start=0&max_results=${maxResults}&sortBy=submittedDate&sortOrder=descending`;
 
       console.log(`🔍 Searching arXiv for: "${topic}"`);
 

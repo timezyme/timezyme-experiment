@@ -47,7 +47,7 @@ For each paper:
 - Save the full markdown using the save-markdown tool to arxiv/[arxiv-id].md
 
 Be thorough and accurate. Extract EVERYTHING from the paper, not just a summary.`,
-  model: vertex(config.vertex.pdfProcessingModel),
+  model: vertex(config.vertex.model),
   tools: {
     downloadPdfTool,
     saveMarkdownTool,
