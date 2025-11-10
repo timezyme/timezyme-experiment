@@ -140,7 +140,9 @@ const processPapersStep = createStep({
           }
         }
       } catch (error) {
-        console.error(`   ❌ Error processing paper ${paper.id}:`, error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error(`   ❌ Error processing paper ${paper.id}: ${errorMsg}`);
+        console.log(`   ⏭️  Continuing to next paper...`);
       }
     }
 

@@ -20,6 +20,9 @@ export const downloadPdfTool = createTool({
     success: z.boolean(),
     filePath: z.string().optional(),
     content: z.string().optional(),
+    numPages: z.number().optional(),
+    contentLength: z.number().optional(),
+    wasTruncated: z.boolean().optional(),
     error: z.string().optional(),
   }),
   execute: async ({ context }) => {
@@ -39,13 +42,25 @@ export const downloadPdfTool = createTool({
       // Parse PDF to extract text
       console.log(`📄 Parsing PDF content...`);
       const pdfData = await pdfParse(pdfBuffer);
-      const textContent = pdfData.text;
+      let textContent = pdfData.text;
+      let wasTruncated = false;
 
-      console.log(`✅ Successfully downloaded and parsed PDF (${pdfData.numpages} pages)`);
+      // Limit content to avoid API timeouts (max ~50,000 characters)
+      const MAX_CONTENT_LENGTH = 50000;
+      if (textContent.length > MAX_CONTENT_LENGTH) {
+        console.log(`⚠️  PDF too large (${textContent.length} chars), truncating to ${MAX_CONTENT_LENGTH} chars`);
+        textContent = textContent.substring(0, MAX_CONTENT_LENGTH) + '\n\n[... Content truncated due to length ...]';
+        wasTruncated = true;
+      }
+
+      console.log(`✅ Successfully downloaded and parsed PDF (${pdfData.numpages} pages, ${textContent.length} chars)`);
 
       return {
         success: true,
         content: textContent,
+        numPages: pdfData.numpages,
+        contentLength: textContent.length,
+        wasTruncated,
         filePath: `${arxivId}.pdf`,
       };
     } catch (error) {
