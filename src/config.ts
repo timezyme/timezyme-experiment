@@ -12,10 +12,7 @@ export const config = {
     projectId: process.env.GOOGLE_PROJECT_ID || '',
     location: process.env.GOOGLE_LOCATION || 'us-central1',
     model: 'gemini-2.0-flash-exp', // Used for Agent #1 (arXiv search)
-  },
-  anthropic: {
-    apiKey: process.env.ANTHROPIC_API_KEY || '',
-    model: 'claude-sonnet-4-20250514', // Claude Sonnet 4.5 for Agent #2 (PDF processing)
+    pdfProcessingModel: 'gemini-2.0-flash-exp', // Used for Agent #2 (PDF processing)
   },
   output: {
     directory: './arxiv',

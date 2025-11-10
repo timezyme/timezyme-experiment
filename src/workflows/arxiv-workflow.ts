@@ -90,7 +90,7 @@ const processPapersStep = createStep({
     savedFiles: z.array(z.string()),
   }),
   execute: async ({ inputData }) => {
-    console.log('📄 Step 2: Processing papers with Claude...');
+    console.log('📄 Step 2: Processing papers with Gemini...');
 
     const papers = inputData.papers;
     const savedFiles: string[] = [];
@@ -152,7 +152,7 @@ const processPapersStep = createStep({
  *
  * This workflow orchestrates the two agents:
  * 1. Agent #1 searches arXiv for papers by topic (Gemini 2.0 Flash)
- * 2. Agent #2 downloads PDFs and processes them with Claude Sonnet 4.5
+ * 2. Agent #2 downloads PDFs and processes them with Gemini 2.0 Flash
  */
 export const arxivWorkflow = createWorkflow({
   id: 'arxiv-pdf-processing-workflow',
