@@ -95,7 +95,7 @@ async function main() {
     });
 
     const { text: markdown } = await generateText({
-      model: vertex(config.vertex.model) as any,
+      model: vertex(config.vertex.model),
       prompt: `Convert this academic paper to well-structured markdown format. Preserve ALL content and sections.
 
 Paper content:

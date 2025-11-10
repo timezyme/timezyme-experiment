@@ -20,6 +20,7 @@
   "dependencies": {
     "@ai-sdk/google-vertex": "^3.0.60",
     "@mastra/core": "latest",
+    "ai": "^5.0.90",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "pdf-parse": "^1.1.1",
