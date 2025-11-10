@@ -118,6 +118,12 @@ const processPapersStep = createStep({
             onStepFinish: (step) => {
               console.log(`      Agent step: ${step.stepType}`);
             },
+            onChunk: (chunk) => {
+              // Show progress for long-running operations
+              if (chunk.type === 'text-delta') {
+                process.stdout.write('.');
+              }
+            },
           }
         );
 
