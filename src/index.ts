@@ -58,14 +58,23 @@ async function main() {
 
     // Use the PDF processor agent to download, process, and save the paper
     const result = await pdfProcessorAgent.generate(
-      `Download and extract the FULL content from the PDF at "${paperUrl}" (arXiv ID: ${arxivId}).
+      `I need you to process an arXiv paper. Here are the details:
+       - PDF URL: ${paperUrl}
+       - arXiv ID: ${arxivId}
 
-       Steps:
-       1. Download the PDF using the download-pdf tool with arxivId="${arxivId}"
-       2. Extract the ENTIRE paper content and convert to markdown, preserving ALL sections and formatting
-       3. Save the complete markdown file using the save-markdown tool with arxivId="${arxivId}"
+       You MUST follow these steps in order:
 
-       IMPORTANT: Extract the COMPLETE paper content, not a summary. Include all sections, references, appendices, etc.`,
+       Step 1: Call the "download-pdf" tool with these parameters:
+       - pdfUrl: "${paperUrl}"
+       - arxivId: "${arxivId}"
+
+       Step 2: After you receive the PDF content, convert the ENTIRE content to markdown format, preserving all sections.
+
+       Step 3: Call the "save-markdown" tool with these parameters:
+       - arxivId: "${arxivId}"
+       - markdown: [the complete markdown you created]
+
+       IMPORTANT: You MUST use the tools. Do not just describe what you would do - actually call the tools!`,
       {
         onStepFinish: (step) => {
           console.log(`   Agent step: ${step.stepType}`);
@@ -81,15 +90,23 @@ async function main() {
 
     // Check if the file was saved successfully
     let savedFile: string | null = null;
+
+    console.log(`\n   Debug: toolResults count: ${result.toolResults?.length || 0}`);
+
     if (result.toolResults) {
       for (const tr of result.toolResults) {
         const toolData = tr as any;
+        console.log(`   Debug: Tool called - ${toolData.toolName}`);
+
         if (toolData.toolName === 'save-markdown' && toolData.result) {
           if (typeof toolData.result === 'object' && 'filePath' in toolData.result) {
             savedFile = toolData.result.filePath as string;
           }
         }
       }
+    } else {
+      console.log('   Debug: No tool results found in response');
+      console.log(`   Debug: Result text: ${result.text?.substring(0, 200) || 'N/A'}`);
     }
 
     console.log('\n\n═══════════════════════════════════════════════════════════');
