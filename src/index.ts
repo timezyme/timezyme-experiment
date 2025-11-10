@@ -58,32 +58,11 @@ async function main() {
 
     // Use the PDF processor agent to download, process, and save the paper
     const result = await pdfProcessorAgent.generate(
-      `I need you to process an arXiv paper. Here are the details:
-       - PDF URL: ${paperUrl}
-       - arXiv ID: ${arxivId}
-
-       You MUST follow these steps in order:
-
-       Step 1: Call the "download-pdf" tool with these parameters:
-       - pdfUrl: "${paperUrl}"
-       - arxivId: "${arxivId}"
-
-       Step 2: After you receive the PDF content, convert the ENTIRE content to markdown format, preserving all sections.
-
-       Step 3: Call the "save-markdown" tool with these parameters:
-       - arxivId: "${arxivId}"
-       - markdown: [the complete markdown you created]
-
-       IMPORTANT: You MUST use the tools. Do not just describe what you would do - actually call the tools!`,
+      `Process this arXiv paper: ${paperUrl} (ID: ${arxivId}). Call download-pdf first, then create markdown and call save-markdown.`,
       {
+        maxSteps: 5, // Limit agent steps to prevent excessive generation
         onStepFinish: (step) => {
           console.log(`   Agent step: ${step.stepType}`);
-        },
-        onChunk: (chunk) => {
-          // Show progress for long-running operations
-          if (chunk.type === 'text-delta') {
-            process.stdout.write('.');
-          }
         },
       }
     );
