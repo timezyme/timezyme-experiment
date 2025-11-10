@@ -151,8 +151,8 @@ const processPapersStep = createStep({
  * Main Workflow: arXiv Paper Processing
  *
  * This workflow orchestrates the two agents:
- * 1. Agent #1 searches arXiv for papers by topic (Gemini 2.0 Flash)
- * 2. Agent #2 downloads PDFs and extracts full content with Gemini 2.0 Flash
+ * 1. Agent #1 searches arXiv for papers by topic (Gemini 2.5 Flash)
+ * 2. Agent #2 downloads PDFs and extracts full content with Gemini 2.5 Flash
  */
 export const arxivWorkflow = createWorkflow({
   id: 'arxiv-pdf-processing-workflow',

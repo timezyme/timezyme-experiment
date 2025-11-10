@@ -18,12 +18,12 @@ const vertex = createVertex({
 /**
  * Agent #2: PDF Processing Agent
  *
- * This agent downloads PDF files, extracts the COMPLETE content using Gemini 2.0 Flash,
+ * This agent downloads PDF files, extracts the COMPLETE content using Gemini 2.5 Flash,
  * and saves the full structured markdown output to disk (preserving all sections).
  */
 export const pdfProcessorAgent = new Agent({
   name: 'pdf-processor-agent',
-  instructions: `You are a PDF processing assistant powered by Gemini 2.0 Flash. Your job is to:
+  instructions: `You are a PDF processing assistant powered by Gemini 2.5 Flash. Your job is to:
 1. Download PDF files from the provided URLs
 2. Extract the ENTIRE content from the PDFs
 3. Convert the full paper content to well-structured markdown format

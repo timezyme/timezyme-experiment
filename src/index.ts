@@ -6,8 +6,8 @@ import { config } from './config.js';
  * Main entry point for the arXiv PDF Processing application
  *
  * This application uses Mastra.ai to:
- * 1. Search arXiv.org for papers by topic (Agent #1 - Gemini 2.0 Flash)
- * 2. Download and process PDFs with Gemini 2.0 Flash (Agent #2)
+ * 1. Search arXiv.org for papers by topic (Agent #1 - Gemini 2.5 Flash)
+ * 2. Download and process PDFs with Gemini 2.5 Flash (Agent #2)
  * 3. Save structured markdown summaries to disk
  */
 async function main() {

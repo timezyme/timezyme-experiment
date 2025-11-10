@@ -32,7 +32,7 @@ When searching:
 - Use the search-arxiv tool to find papers
 - Return the complete list of papers with their IDs, titles, summaries, and PDF URLs
 - Be thorough and accurate in your search results`,
-  model: vertex('gemini-2.0-flash-exp'),
+  model: vertex(config.vertex.model),
   tools: {
     searchArxivTool,
   },

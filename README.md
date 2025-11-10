@@ -1,6 +1,6 @@
 # arXiv PDF Processor with Mastra.ai
 
-A TypeScript application built with [Mastra.ai](https://mastra.ai) that automatically fetches arXiv papers by topic, downloads PDFs, and processes them using **Gemini 2.0 Flash** to generate structured markdown summaries.
+A TypeScript application built with [Mastra.ai](https://mastra.ai) that automatically fetches arXiv papers by topic, downloads PDFs, and processes them using **Gemini 2.5 Flash** to generate structured markdown summaries.
 
 ## 🏗️ Architecture
 
@@ -16,7 +16,7 @@ This application follows a **clean, architecturally sound design** with clear se
 ┌────────────────────┐            ┌─────────────────────────┐
 │    Agent #1        │            │      Agent #2           │
 │  arXiv Search      │────────▶   │   PDF Processor         │
-│  (Gemini 2.0)      │  Papers    │  (Gemini 2.0)           │
+│  (Gemini 2.5)      │  Papers    │  (Gemini 2.5)           │
 └────────┬───────────┘            └──────────┬──────────────┘
          │                                    │
          ▼                                    ▼
@@ -35,11 +35,11 @@ This application follows a **clean, architecturally sound design** with clear se
 **Agent #1** (`src/agents/arxiv-agent.ts`): arXiv Search Agent
 - Searches arXiv.org API for papers by topic
 - Returns PDF URLs and paper metadata
-- Uses: Gemini 2.0 Flash (fast, efficient)
+- Uses: Gemini 2.5 Flash (fast, efficient)
 
 **Agent #2** (`src/agents/pdf-processor-agent.ts`): PDF Processing Agent
 - Downloads PDFs from URLs
-- Processes content with **Gemini 2.0 Flash**
+- Processes content with **Gemini 2.5 Flash**
 - Generates structured markdown summaries
 - Saves to disk with arXiv ID as filename
 
@@ -148,8 +148,8 @@ Each file contains:
 📋 Configuration:
    Topic: "LLM Graph Knowledge"
    Max Results: 5
-   Search Model: gemini-2.0-flash-exp (Gemini)
-   Processing Model: gemini-2.0-flash-exp (Gemini)
+   Search Model: gemini-2.5-flash-001 (Gemini)
+   Processing Model: gemini-2.5-flash-001 (Gemini)
    Output Directory: ./arxiv
 
 🔍 Step 1: Searching arXiv...
@@ -243,7 +243,7 @@ TypeScript provides full type safety across:
 
 - **[Mastra.ai](https://mastra.ai)**: AI agent framework
 - **[Vercel AI SDK](https://ai-sdk.dev)**: LLM provider integrations
-- **[Google Vertex AI](https://cloud.google.com/vertex-ai)**: Gemini 2.0 Flash for both agents
+- **[Google Vertex AI](https://cloud.google.com/vertex-ai)**: Gemini 2.5 Flash for both agents
 - **[Zod](https://zod.dev)**: Schema validation
 - **[arXiv API](https://info.arxiv.org/help/api)**: Academic paper search
 - **TypeScript**: Type-safe development
@@ -296,7 +296,7 @@ import { config } from '../config.js';
 export const myAgent = new Agent({
   name: 'my-agent',
   instructions: 'What this agent does...',
-  model: vertex('gemini-2.0-flash-exp', {
+  model: vertex('gemini-2.5-flash-001', {
     project: config.vertex.projectId,
     location: config.vertex.location,
   }),
@@ -333,7 +333,7 @@ const myStep = createStep({
 **Error: "Model not found"**
 - Ensure Vertex AI API is enabled in your GCP project
 - Verify the model is available in your region (`GOOGLE_LOCATION`)
-- Check model name is correct (`gemini-2.0-flash-exp`)
+- Check model name is correct (`gemini-2.5-flash-001`)
 
 ## 📄 License
 
@@ -342,5 +342,5 @@ MIT
 ## 🙏 Acknowledgments
 
 - [Mastra.ai](https://mastra.ai) for the excellent AI framework
-- [Google Cloud](https://cloud.google.com/) for Vertex AI and Gemini 2.0 Flash
+- [Google Cloud](https://cloud.google.com/) for Vertex AI and Gemini 2.5 Flash
 - [arXiv.org](https://arxiv.org) for providing open access to research papers
