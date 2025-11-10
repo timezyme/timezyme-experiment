@@ -11,8 +11,8 @@ export const config = {
   vertex: {
     projectId: process.env.GOOGLE_PROJECT_ID || '',
     location: process.env.GOOGLE_LOCATION || 'us-central1',
-    model: 'gemini-2.5-flash-001', // Used for Agent #1 (arXiv search)
-    pdfProcessingModel: 'gemini-2.5-flash-001', // Used for Agent #2 (PDF processing)
+    model: 'gemini-2.5-flash', // Used for Agent #1 (arXiv search)
+    pdfProcessingModel: 'gemini-2.5-flash', // Used for Agent #2 (PDF processing)
   },
   output: {
     directory: './arxiv',

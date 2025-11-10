@@ -148,8 +148,8 @@ Each file contains:
 📋 Configuration:
    Topic: "LLM Graph Knowledge"
    Max Results: 5
-   Search Model: gemini-2.5-flash-001 (Gemini)
-   Processing Model: gemini-2.5-flash-001 (Gemini)
+   Search Model: gemini-2.5-flash (Gemini)
+   Processing Model: gemini-2.5-flash (Gemini)
    Output Directory: ./arxiv
 
 🔍 Step 1: Searching arXiv...
@@ -296,7 +296,7 @@ import { config } from '../config.js';
 export const myAgent = new Agent({
   name: 'my-agent',
   instructions: 'What this agent does...',
-  model: vertex('gemini-2.5-flash-001', {
+  model: vertex('gemini-2.5-flash', {
     project: config.vertex.projectId,
     location: config.vertex.location,
   }),
@@ -333,7 +333,7 @@ const myStep = createStep({
 **Error: "Model not found"**
 - Ensure Vertex AI API is enabled in your GCP project
 - Verify the model is available in your region (`GOOGLE_LOCATION`)
-- Check model name is correct (`gemini-2.5-flash-001`)
+- Check model name is correct (`gemini-2.5-flash`)
 
 ## 📄 License
 
