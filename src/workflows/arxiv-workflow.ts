@@ -49,13 +49,20 @@ const searchArxivStep = createStep({
         const resultData = toolResult as any;
         console.log(`   Debug: toolResult keys: ${Object.keys(resultData).join(', ')}`);
 
-        // Try different extraction patterns
-        if (resultData.result && typeof resultData.result === 'object' && 'papers' in resultData.result) {
+        // Extract from payload (Mastra structure)
+        if (resultData.payload && typeof resultData.payload === 'object' && 'papers' in resultData.payload) {
+          papers = resultData.payload.papers as any[];
+          console.log(`   Debug: Extracted ${papers.length} papers from payload.papers`);
+          break;
+        }
+        // Try result property
+        else if (resultData.result && typeof resultData.result === 'object' && 'papers' in resultData.result) {
           papers = resultData.result.papers as any[];
           console.log(`   Debug: Extracted ${papers.length} papers from result.papers`);
           break;
-        } else if (resultData.content && Array.isArray(resultData.content)) {
-          // Try AI SDK result structure
+        }
+        // Try content array (AI SDK v5 structure)
+        else if (resultData.content && Array.isArray(resultData.content)) {
           for (const content of resultData.content) {
             if (content.type === 'tool-result' && content.result && 'papers' in content.result) {
               papers = content.result.papers as any[];
