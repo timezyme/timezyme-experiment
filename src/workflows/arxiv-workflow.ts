@@ -41,51 +41,25 @@ const searchArxivStep = createStep({
     // Extract papers from the tool results
     let papers: any[] = [];
 
-    // Debug: log the tool results structure
-    console.log(`   Debug: toolResults count: ${result.toolResults?.length || 0}`);
-
     if (result.toolResults && result.toolResults.length > 0) {
       for (const toolResult of result.toolResults) {
         const resultData = toolResult as any;
-        console.log(`   Debug: toolResult keys: ${Object.keys(resultData).join(', ')}`);
-
-        // Debug: log payload structure
-        if (resultData.payload) {
-          console.log(`   Debug: payload type: ${typeof resultData.payload}`);
-          console.log(`   Debug: payload keys: ${Object.keys(resultData.payload).join(', ')}`);
-          console.log(`   Debug: payload content: ${JSON.stringify(resultData.payload).substring(0, 200)}...`);
-        }
 
         // Extract from payload.result (Mastra structure)
         if (resultData.payload?.result && typeof resultData.payload.result === 'object' && 'papers' in resultData.payload.result) {
           papers = resultData.payload.result.papers as any[];
-          console.log(`   Debug: Extracted ${papers.length} papers from payload.result.papers`);
           break;
         }
-        // Try payload directly
+        // Fallback: try payload directly
         else if (resultData.payload && typeof resultData.payload === 'object' && 'papers' in resultData.payload) {
           papers = resultData.payload.papers as any[];
-          console.log(`   Debug: Extracted ${papers.length} papers from payload.papers`);
           break;
         }
-        // Try result property
+        // Fallback: try result property
         else if (resultData.result && typeof resultData.result === 'object' && 'papers' in resultData.result) {
           papers = resultData.result.papers as any[];
-          console.log(`   Debug: Extracted ${papers.length} papers from result.papers`);
           break;
         }
-        // Try content array (AI SDK v5 structure)
-        else if (resultData.content && Array.isArray(resultData.content)) {
-          for (const content of resultData.content) {
-            if (content.type === 'tool-result' && content.result && 'papers' in content.result) {
-              papers = content.result.papers as any[];
-              console.log(`   Debug: Extracted ${papers.length} papers from content.result.papers`);
-              break;
-            }
-          }
-        }
-
-        if (papers.length > 0) break;
       }
     }
 
